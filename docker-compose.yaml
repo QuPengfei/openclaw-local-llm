@@ -1,0 +1,94 @@
+version: '3.8'
+
+services:
+  vllm-service:
+    #image: vllm/vllm-openai:v0.16.0-x86_64-cu130 
+    image: vllm/vllm-openai:v0.13.0
+    shm_size: '32gb'
+    container_name: vllm-service
+    hostname: vllm-service
+    restart: unless-stopped
+    command: --model /models/Qwen/Qwen3-30B-A3B --trust-remote-code --tensor-parallel-size 8 --max-model-len 32768 --port 8000 --disable-log-stats --enable-prefix-caching --enable-chunked-prefill  --pipeline-parallel-size 1 --gpu_memory_utilization 0.95 --served-model-name Qwen/Qwen3-30B-A3B 
+    privileged: true
+      #network_mode: host
+    ports:
+      - 8081:8000
+    environment:
+      - CUDA_MODULE_LOADING=LAZY
+      - CUDA_VISIBLE_DEVICE=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+      - VLLM_WORKER_MULTIPROC_METHOD=spawn
+    volumes:
+      - ${PWD}/model-cache:/root/.cache/huggingface
+      - /home/amd/ai-data/models/:/models/
+    healthcheck:
+      test: ["CMD","curl","-f","http://localhost:8000/health"]
+      interval: 30s
+      timeout: 15s
+      retries: 10
+      start_period: 180s
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: nvidia
+            count: all
+            capabilities: [gpu]
+    networks:
+      - openclaw-net
+
+  openclaw-gateway:
+    image: ghcr.io/openclaw/openclaw:latest
+    container_name: openclaw-gateway
+    restart: unless-stopped
+    ports:
+      - "18789:18789"
+    volumes:
+      - ./config:/home/node/.openclaw
+      - ./workspace:/home/node/workspace
+    environment:
+      - NODE_ENV=production
+    user: "1000:1000"
+    depends_on:
+      vllm-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD","curl","-f","http://localhost:18789/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: "2.0"
+        reservations:
+          memory: 512M
+          cpus: "0.5"
+    networks:
+      - openclaw-net
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+  openclaw-cli:
+    image: ghcr.io/openclaw/openclaw:latest
+    container_name: openclaw-cli
+    profiles:
+      - tools
+    volumes:
+      - ./config:/home/node/.openclaw
+      - ./workspace:/home/node/workspace
+    user: "1000:1000"
+    stdin_open: true
+    tty: true
+    networks:
+      - openclaw-net
+
+networks:
+  openclaw-net:
+    driver: bridge
+

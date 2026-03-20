@@ -1,0 +1,64 @@
+{
+  "meta": {
+    "lastTouchedVersion": "2026.3.13",
+    "lastTouchedAt": "2026-03-20T17:29:50.507Z"
+  },
+  "models": {
+    "providers": {
+      "vllm": {
+        "baseUrl": "http://vllm-service:8081/v1",
+        "apiKey": "vllm-local",
+        "api": "openai-completions",
+        "models": [
+          {
+            "id": "Qwen/Qwen3-30B-A3B",
+            "name": "Qwen/Qwen3-30B-A3B",
+            "contextWindow": 32768,
+            "maxTokens": 4096
+          }
+        ]
+      }
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "Qwen/Qwen3-30B-A3B"
+      },
+      "workspace": "/home/node/.openclaw/workspace",
+      "compaction": {
+        "mode": "safeguard"
+      }
+    }
+  },
+  "commands": {
+    "native": "auto",
+    "nativeSkills": "auto",
+    "restart": true,
+    "ownerDisplay": "raw"
+  },
+  "gateway": {
+    "port": 18789,
+    "mode": "local",
+    "bind": "lan",
+    "controlUi": {
+      "allowedOrigins": [
+        "http://localhost:18789",
+        "http://127.0.0.1:18789"
+      ],
+      "allowInsecureAuth": true,
+      "dangerouslyDisableDeviceAuth": true
+    },
+    "auth": {
+      "mode": "token",
+      "token": "84a354779b04addc69a7d7aae4dccd4e0faed55742a13e8fc45f67dd23fa2f2d"
+    }
+  },
+  "plugins": {
+    "entries": {
+      "qwen-portal-auth": {
+        "enabled": true
+      }
+    }
+  }
+}
