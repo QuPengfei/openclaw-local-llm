@@ -3,6 +3,17 @@
 
 The **OpenClaw local LLM Deployment** is one-click to deploy the openclaw with vLLM.
 
+### Build the docker image for OpenClaw+Pinchbench
+
+```
+docker build -t pinchbench:v1 -f Dockerfile.1.pinchbench
+```
+
+### Download the models
+
+```
+ download the ai models in the folder models
+```
 ### Setup
 
 #### 
@@ -15,11 +26,18 @@ sudo chown -R 1000:1000 ./workspace
 
 #### Start/stop the openclaw and vLLM
 
-Now it support Qwen3-30B-A3B and can switch to other platform.
+Now it support Qwen3-32B in default  and can switch to other AI models.
 
 ```
 docker compose up -d
 docker compose down
+```
+
+#### run benchmark with pinchbench
+
+```
+cd /app/skill
+/scripts/run.sh --model vllm/Qwen/Qwen3-32B --suite all --no-upload  --judge vllm/Qwen/Qwen3-32B
 ```
 
 #### Open with brower
@@ -45,7 +63,7 @@ curl -s -H "Authorization: Bearer 84a354779b04addc69a7d7aae4dccd4e0faed55742a13e
 
 ### openclaw.json
 
-it is in the config/openclaw.json
+it is example in the config/openclaw.json
 ```
 {
   "models": {

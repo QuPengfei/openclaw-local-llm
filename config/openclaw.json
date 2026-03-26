@@ -1,20 +1,30 @@
 {
   "meta": {
     "lastTouchedVersion": "2026.3.13",
-    "lastTouchedAt": "2026-03-20T17:29:50.507Z"
+    "lastTouchedAt": "2026-03-26T14:50:59.590Z"
   },
   "models": {
     "providers": {
       "vllm": {
-        "baseUrl": "http://vllm-service:8081/v1",
+        "baseUrl": "http://10.69.13.39:8081/v1",
         "apiKey": "vllm-local",
         "api": "openai-completions",
         "models": [
           {
-            "id": "Qwen/Qwen3-30B-A3B",
-            "name": "Qwen/Qwen3-30B-A3B",
-            "contextWindow": 32768,
-            "maxTokens": 4096
+            "id": "Qwen/Qwen3-32B",
+            "name": "Qwen/Qwen3-32B",
+            "reasoning": false,
+            "input": [
+              "text"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 131072,
+            "maxTokens": 8192
           }
         ]
       }
@@ -23,7 +33,7 @@
   "agents": {
     "defaults": {
       "model": {
-        "primary": "Qwen/Qwen3-30B-A3B"
+        "primary": "vllm/Qwen/Qwen3-32B"
       },
       "workspace": "/home/node/.openclaw/workspace",
       "compaction": {
