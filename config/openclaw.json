@@ -1,12 +1,12 @@
 {
   "meta": {
-    "lastTouchedVersion": "2026.3.13",
-    "lastTouchedAt": "2026-03-26T14:50:59.590Z"
+    "lastTouchedVersion": "2026.3.24",
+    "lastTouchedAt": "2026-03-27T20:16:50.018Z"
   },
   "models": {
     "providers": {
       "vllm": {
-        "baseUrl": "http://10.69.13.39:8081/v1",
+        "baseUrl": "http://vllm-service:8081/v1",
         "apiKey": "vllm-local",
         "api": "openai-completions",
         "models": [
@@ -27,13 +27,52 @@
             "maxTokens": 8192
           }
         ]
+      },
+      "llamacpp": {
+        "baseUrl": "http://10.69.13.61:8081/v1",
+        "apiKey": "llamacpp-local",
+        "api": "openai-completions",
+        "models": [
+          {
+            "id": "Qwen3.5-35B-A3B-Q4_K_M.gguf",
+            "name": "Qwen3.5-35B-A3B Q4",
+            "reasoning": false,
+            "input": [
+              "text"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 131072,
+            "maxTokens": 8192
+          },
+          {
+            "id": "Qwen3.5-35B-A3B-Q8_0.gguf",
+            "name": "Qwen3.5-35B-A3B Q8",
+            "reasoning": false,
+            "input": [
+              "text"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 131072,
+            "maxTokens": 8192
+          }
+        ]
       }
     }
   },
   "agents": {
     "defaults": {
       "model": {
-        "primary": "vllm/Qwen/Qwen3-32B"
+        "primary": "llamacpp/Qwen3.5-35B-A3B-Q8_0.gguf"
       },
       "workspace": "/home/node/.openclaw/workspace",
       "compaction": {

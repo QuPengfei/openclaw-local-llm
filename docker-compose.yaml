@@ -1,27 +1,21 @@
 version: '3.8'
 
 services:
-  vllm-service:
-    #image: vllm/vllm-openai:v0.16.0-x86_64-cu130 
-    image: vllm/vllm-openai:v0.13.0
+  llamacpp-service:
+    image: ghcr.io/ggml-org/llama.cpp:server
+    cpuset: '128-255'
     shm_size: '32gb'
-    container_name: vllm-service
-    hostname: vllm-service
+    container_name: llamacpp-service
+    hostname: llamacpp-service
     restart: unless-stopped
-    command: --model /models/Qwen/Qwen3-32B --trust-remote-code --tensor-parallel-size 8 --max-model-len 128000 --port 8000 --disable-log-stats --enable-prefix-caching --enable-chunked-prefill  --pipeline-parallel-size 1 --gpu_memory_utilization 0.95 --served-model-name Qwen/Qwen3-32B --enable-auto-tool-choice --tool-call-parser hermes --reasoning-parser deepseek_r1 
+      #command: -m /models/unsloth/Qwen3.5-35B-A3B-GGUF/Qwen3.5-35B-A3B-Q4_K_M.gguf --port 8000 --host 0.0.0.0 -c 128000 -t 128 --n-gpu-layers 0 
+    command: -m /models/unsloth/Qwen3.5-35B-A3B-GGUF/Qwen3.5-35B-A3B-Q8_0.gguf --port 8000 --host 0.0.0.0 -c 128000 -t 128 --n-gpu-layers 0 --parallel 8 --cont-batching --mlock 
     privileged: true
       #network_mode: host
     ports:
       - 8081:8000
-    environment:
-      - CUDA_MODULE_LOADING=LAZY
-      - CUDA_VISIBLE_DEVICE=all
-      - NVIDIA_DRIVER_CAPABILITIES=all
-      - VLLM_WORKER_MULTIPROC_METHOD=spawn
-      - VLLM_ALLOW_LONG_MAX_MODEL_LEN=1
     volumes:
-      - ${PWD}/model-cache:/root/.cache/huggingface
-      - ${PWD}/models/:/models/
+      - /mnt/data/models/:/models/
     healthcheck:
       test: ["CMD","curl","-f","http://localhost:8000/health"]
       interval: 30s
@@ -30,16 +24,14 @@ services:
       start_period: 180s
     deploy:
       resources:
+        limits:
+          cpus: "128"
         reservations:
-          devices:
-          - driver: nvidia
-            count: all
-            capabilities: [gpu]
-    networks:
-      - openclaw-net
+          cpus: "128"
 
   openclaw-gateway:
     image: pinchbench:v1
+    cpuset: '0-127'
     container_name: openclaw-gateway
     restart: unless-stopped
       #command: bash -c "while true; do echo hello; sleep 100; done"
@@ -52,7 +44,7 @@ services:
       - NODE_ENV=production
     user: "1000:1000"
     depends_on:
-      vllm-service:
+      llamacpp-service:
         condition: service_healthy
     healthcheck:
       test: ["CMD","curl","-f","http://localhost:18789/healthz"]
@@ -68,8 +60,6 @@ services:
         reservations:
           memory: 512M
           cpus: "16.0"
-    networks:
-      - openclaw-net
     logging:
       driver: json-file
       options:
@@ -87,10 +77,3 @@ services:
     user: "1000:1000"
     stdin_open: true
     tty: true
-    networks:
-      - openclaw-net
-
-networks:
-  openclaw-net:
-    driver: bridge
-

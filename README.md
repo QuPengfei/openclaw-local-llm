@@ -1,18 +1,18 @@
 
 ### Introduction
 
-The **OpenClaw local LLM Deployment** is one-click to deploy the openclaw with vLLM.
+The **OpenClaw local LLM Deployment** is one-click to deploy the openclaw with backend vLLM, llama.cpp
 
 ### Build the docker image for OpenClaw+Pinchbench
 
 ```
-docker build -t pinchbench:v1 -f Dockerfile.1.pinchbench
+docker build -t pinchbench:v1 -f Dockerfile.1.pinchbench .
 ```
 
 ### Download the models
 
 ```
- download the ai models in the folder models
+ download the ai models in the folder *models*
 ```
 ### Setup
 
@@ -26,7 +26,10 @@ sudo chown -R 1000:1000 ./workspace
 
 #### Start/stop the openclaw and vLLM
 
-Now it support Qwen3-32B in default  and can switch to other AI models.
+Now it support the following backend and models:
+
+- vLLM on GPU: Qwen3-32B
+- llamacpp on CPU: Qwen3.5-35B-A3B-Q8_0.gguf
 
 ```
 docker compose up -d
@@ -35,11 +38,21 @@ docker compose down
 
 #### run benchmark with pinchbench
 
+enter into the container
+```
+docker exec -ti openclaw-pinch bash
+```
+##### vLLM as backend with Qwen/Qwen3-32B
 ```
 cd /app/skill
-/scripts/run.sh --model vllm/Qwen/Qwen3-32B --suite all --no-upload  --judge vllm/Qwen/Qwen3-32B
+./scripts/run.sh --model vllm/Qwen/Qwen3-32B --suite all --no-upload  --judge vllm/Qwen/Qwen3-32B
+./scripts/run.sh --model vllm/Qwen/Qwen3-32B --suite automated-only --no-upload
 ```
-
+##### llama.cpp as backend with 
+```
+cd /app/skill
+./scripts/run.sh --model llamacpp/Qwen3.5-35B-A3B-Q8_0.gguf --suite task_08_memory --no-upload -v
+```
 #### Open with brower
 ```
 http://ip:18789
@@ -64,6 +77,11 @@ curl -s -H "Authorization: Bearer 84a354779b04addc69a7d7aae4dccd4e0faed55742a13e
 ### openclaw.json
 
 it is example in the config/openclaw.json
+
+Just remind to replace the llamacpp-service/vllm-service with you LLM server IP
+
+From
+"baseUrl": "http://vllm-service:8081/v1"
 ```
 {
   "models": {
